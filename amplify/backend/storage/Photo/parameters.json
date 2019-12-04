@@ -1,0 +1,5 @@
+{
+    "tableName": "Photo",
+    "partitionKeyName": "Id",
+    "partitionKeyType": "S"
+}

@@ -1,0 +1,20 @@
+{
+    "prd": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-casosapp-prd-203043-authRole",
+            "UnauthRoleArn": "arn:aws:iam::888373230443:role/amplify-casosapp-prd-203043-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::888373230443:role/amplify-casosapp-prd-203043-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "amplify-casosapp-prd-203043-deployment",
+            "UnauthRoleName": "amplify-casosapp-prd-203043-unauthRole",
+            "StackName": "amplify-casosapp-prd-203043",
+            "StackId": "arn:aws:cloudformation:us-east-1:888373230443:stack/amplify-casosapp-prd-203043/6a457b30-1319-11ea-ab90-12da3ecd6186",
+            "AmplifyAppId": "d2x6snr2mm4k77"
+        },
+        "categories": {
+            "auth": {
+                "casosappf8c216b6": {}
+            }
+        }
+    }
+}

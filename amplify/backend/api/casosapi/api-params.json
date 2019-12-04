@@ -1,0 +1,85 @@
+{
+    "paths": [
+        {
+            "name": "/people",
+            "lambdaFunction": "peoplefunction",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
+            }
+        },
+        {
+            "name": "/photos",
+            "lambdaFunction": "photosfunction",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
+            }
+        },
+        {
+            "name": "/cases",
+            "lambdaFunction": "casosfunction",
+            "privacy": {
+                "open": true
+            }
+        }
+    ],
+    "resourceName": "casosapi",
+    "apiName": "casosapi",
+    "functionArns": [
+        {
+            "lambdaFunction": "peoplefunction"
+        },
+        {
+            "lambdaFunction": "photosfunction"
+        },
+        {
+            "lambdaFunction": "casosfunction"
+        }
+    ],
+    "privacy": {
+        "auth": 2,
+        "unauth": 0,
+        "authRoleName": "amplify-casosapp-prd-203043-authRole",
+        "unAuthRoleName": "amplify-casosapp-prd-203043-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "peoplefunction",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        },
+        {
+            "category": "function",
+            "resourceName": "photosfunction",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        },
+        {
+            "category": "function",
+            "resourceName": "casosfunction",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ],
+    "uuid": "2b28a395"
+}

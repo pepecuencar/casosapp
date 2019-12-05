@@ -27,25 +27,25 @@ router.get('/cases', (req, res) => {
     });
 });
 router.get('/cases/:id', (req, res) => {
-    const id = req.params.id;
+    const photoCaseId = req.params.id;
+    console.log("photocaseId : " +photoCaseId );
+    const filtro = "'photoCaseId':'" +photoCaseId +"'";
     const params = {
         TableName: PHOTO_TABLE,
-        Key: {id}
+        FilterExpression: filtro
     };
     console.log(params);
 
-    dynamoDb.get(params, (error, result) => {
+    dynamoDb.scan(params, (error, result) => {
         if (error) {
-            console.log("Sucedio un error");
+            console.log("Error while retrieving data: " + error);
             res.status(400).json({ error: 'Error retrieving Photo Case' });
         }
-        if (result.Item) {
-            console.log(result.Item);
-            
+        if (result.Item) {            
             res.json(result.Item);
         } 
         else {
-            console.log("No encontre el dato un error");
+            console.log("Data not foun for photoCaseId");
             res.status(404).json({ error: `Case not found` });
         }
     });

@@ -3,14 +3,18 @@ const express = require('express');
 const uuid = require('uuid');
 
 let CASO_TABLE = "Caso";
+let PHOTO_TABLE= "Photo";
+
 if(process.env.ENV && process.env.ENV !== "NONE") {
   CASO_TABLE = CASO_TABLE + '-' + process.env.ENV;
+  PHOTO_TABLE = PHOTO_TABLE + '-' + process.env.ENV;
 }
 AWS.config.update({ region: process.env.TABLE_REGION });
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 const router = express.Router();
+
 router.get('/cases', (req, res) => {
     const params = {
         TableName: CASO_TABLE
@@ -25,19 +29,24 @@ router.get('/cases', (req, res) => {
 router.get('/cases/:id', (req, res) => {
     const id = req.params.id;
     const params = {
-        TableName: CASO_TABLE,
-        Key: {
-            id
-        }
+        TableName: PHOTO_TABLE,
+        Key: {id}
     };
+    console.log(params);
+
     dynamoDb.get(params, (error, result) => {
         if (error) {
-            res.status(400).json({ error: 'Error retrieving Employee' });
+            console.log("Sucedio un error");
+            res.status(400).json({ error: 'Error retrieving Photo Case' });
         }
         if (result.Item) {
+            console.log(result.Item);
+            
             res.json(result.Item);
-        } else {
-            res.status(404).json({ error: `Employee with id: ${id} not found` });
+        } 
+        else {
+            console.log("No encontre el dato un error");
+            res.status(404).json({ error: `Case not found` });
         }
     });
 });

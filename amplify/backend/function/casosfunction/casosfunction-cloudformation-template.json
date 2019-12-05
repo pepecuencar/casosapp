@@ -71,7 +71,7 @@
 				"Timeout": "25",
 				"Code": {
 					"S3Bucket": "amplify-casosapp-prd-203043-deployment",
-					"S3Key": "amplify-builds/casosfunction-586c36337272726f6b35-build.zip"
+					"S3Key": "amplify-builds/casosfunction-69663273614e4455355a-build.zip"
 				}
 			}
 		},

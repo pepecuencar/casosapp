@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {BrowserRouter as Router, Route, NavLink} from 'react-router-dom';
-import { Divider, Form, Grid,Header, Input, Segment, Table } from 'semantic-ui-react';
+import { Divider, Form, Grid,Header, List, Input, Segment, Table } from 'semantic-ui-react';
 import './App.css';
 import {v4 as uuid} from 'uuid';
 import Amplify, { API, Auth, Storage } from 'aws-amplify';
@@ -73,21 +73,63 @@ class NewCase extends Component {
     }
 }
 
-class CasesList extends React.Component {
+class CasesListLoader extends React.Component{
+  constructor(props) {
+    super(props);
+    this.state = { caso: [] }
+  }
+  async componentDidMount() {
+    await this.fetchList();
+  }
+  async fetchList() {
+    const response = await API.get("casosapi", "/cases");
+    this.setState({ caso: [...response] });
+  }
+
+  render() {
+        return (<CasesList caso={this.state.caso}/> );
+        }
+}
+
+class CasesList extends React.Component { 
+  caseItems() {
+    return this.props.caso.sort(makeComparator('name')).map(caso =>
+      <List.Item key={caso.id}>
+        <NavLink to={`/cases/${caso.id}`}>{caso.name}</NavLink>
+      </List.Item>
+    );
+  }
+
+  render() {
+    return (
+      <Segment>
+        <Header as='h3'>Mis Casos</Header>
+        <List divided relaxed>
+          {this.caseItems()}
+        </List>
+      </Segment>
+    );
+  }
+}
+
+/*class CasesList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {caso: []};
   }
   async componentDidMount() {
     await this.fetchList();
+    console.log("Casos " + this.state.caso.id);
   }
-  
+
   async fetchList() {
     const response = await API.get("casosapi", "/cases");
     this.setState({ caso: [...response] });
+    console.log(this.state);
   }
+  
   caseItems() {
-    return this.state.caso.sort(makeComparator('name')).map(caso =>
+    return this.props.caso.sort(makeComparator('name')).map(caso =>
      <Table.Row key={caso.id}>
         <Table.Cell > <a href={'/cases/' + caso.id}> {caso.name} </a>
         </Table.Cell>
@@ -95,6 +137,7 @@ class CasesList extends React.Component {
       </Table.Row>
     );
   }
+
   render() {
     return (
       <Segment>
@@ -111,7 +154,7 @@ class CasesList extends React.Component {
       </Segment>
     );
   }
-}
+}*/
 
 class S3ImageUpload extends React.Component {
   constructor(props) {
@@ -191,37 +234,30 @@ class PhotosList extends React.Component {
 
 class CaseDetailsLoader extends React.Component {
   constructor(props) {
-      super(props);
-      this.state = {hasMorePhotos: true,loading: true}
+    super(props);
+    this.state = { caso: [] }
   }
-  componentDidMount() {
+  async componentDidMount() {
+    await this.fetchList();
   }
-  render() {
-      return (
-          <CaseDetails caso={this.state.id} 
-          />
-      );
+  async fetchList() {
+    const response = await API.get("casosapi", "/cases/" + this.props.id);
+    this.setState({ caso: [...response] });
   }
-}
 
+  render() {
+        return (<CaseDetails caso={this.state.caso}/> );
+        }
+}
 
 class CaseDetails extends Component {
   render() {
       if (!this.props.caso) return 'Loading Case...';
       return (
           <Segment>
-          <Header as='h3'>{this.props.caso.name}</Header>
-          <S3ImageUpload caseId={this.props.caso.id}/>        
-          <PhotosList photos={this.props.caso.photos.items} />
-          {
-              this.props.hasMorePhotos && 
-              <Form.Button
-              onClick={this.props.loadMorePhotos}
-              icon='refresh'
-              disabled={this.props.loadingPhotos}
-              content={this.props.loadingPhotos ? 'Loading...' : 'Load more photos'}
-              />
-          }
+            <Header as='h3'>{this.props.caso.id}</Header>
+            <Header as='h3'>{this.props.caso.photoCaseId}</Header>
+            <S3ImageUpload caseId={this.props.caso.id}/>        
           </Segment>
       )
   }
@@ -234,12 +270,10 @@ class App extends Component {
         <Grid padded>
           <Grid.Column>
             <Route path="/" exact component={NewCase}/>
-            <Route path="/" exact component={CasesList} /> 
-            <Route path="/cases/:caseId" render={ () => <div><NavLink to='/'>Regresar a Mis casos</NavLink></div> }
-            />
+            <Route path="/" exact component={CasesListLoader} /> 
+            <Route path="/cases/:caseId" render={ () => <div><NavLink to='/'>Regresar a Mis casos </NavLink></div> }/>
             <Route
-              path="/cases/:caseId"
-              render={ props => <CaseDetailsLoader id={props.match.params.caseid}/> }
+              path="/cases/:caseId" render={props=> <CaseDetailsLoader id={props.match.params.caseId}/> }
             />
           </Grid.Column>
         </Grid>
@@ -248,3 +282,4 @@ class App extends Component {
   }
 }  
 export default withAuthenticator(App, {includeGreetings: true});
+

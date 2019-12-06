@@ -28,28 +28,39 @@ router.get('/cases', (req, res) => {
 });
 router.get('/cases/:id', (req, res) => {
     const photoCaseId = req.params.id;
-    console.log("photocaseId : " +photoCaseId );
-    const filtro = "'photoCaseId':'" +photoCaseId +"'";
-    const params = {
+    console.log("photoCaseId : " +photoCaseId );
+    /*const params = {
         TableName: PHOTO_TABLE,
         FilterExpression: filtro
+    };*/
+    const params = {
+        TableName: PHOTO_TABLE,
+        FilterExpression: "photoCaseId = :photoCaseId_val",
+        ExpressionAttributeValues: { ":photoCaseId_val": photoCaseId }
     };
     console.log(params);
+    dynamoDb.scan(params, result);
+    var count = 0;
 
-    dynamoDb.scan(params, (error, result) => {
-        if (error) {
-            console.log("Error while retrieving data: " + error);
-            res.status(400).json({ error: 'Error retrieving Photo Case' });
+    function result(err, data) {
+        if (err) {console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));} 
+        else {        
+            console.log("Scan succeeded.");
+            console.log("Data Items " + data.Items);
+            data.Items.forEach(function(itemdata) {
+                console.log("Item :", ++count,JSON.stringify(itemdata));
+                res.json(data.Items);
+            });
+            // continue scanning if we have more items
+            if (typeof data.LastEvaluatedKey != "undefined") {
+                console.log("Scanning for more...");
+                params.ExclusiveStartKey = data.LastEvaluatedKey;
+                dynamoDb.scan(params, result);
+            }
         }
-        if (result.Item) {            
-            res.json(result.Item);
-        } 
-        else {
-            console.log("Data not foun for photoCaseId");
-            res.status(404).json({ error: `Case not found` });
-        }
-    });
+    }
 });
+
 router.post('/cases', (req, res) => {
     const rightNow = new Date();
     const createdAt = rightNow.toISOString();
@@ -75,7 +86,8 @@ router.post('/cases', (req, res) => {
             res.json({error: error, url: req.url, body: req.body});
         }
         else{
-            res.json({success: 'post call succeed!', url: req.url, data: data})
+            console.log("Case Created Successfully " + params.Item);
+            res.status(201).send(params.Item);
         }   
     });
 });

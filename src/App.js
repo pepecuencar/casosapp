@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {BrowserRouter as Router, Route, NavLink} from 'react-router-dom';
-import { Divider, Form, Grid,Header, List, Input, Segment, Table } from 'semantic-ui-react';
+import { Divider, Form, Grid,Header, Input, Segment, Table } from 'semantic-ui-react';
 import './App.css';
 import {v4 as uuid} from 'uuid';
 import Amplify, { API, Auth, Storage } from 'aws-amplify';
@@ -91,28 +91,37 @@ class CasesListLoader extends React.Component{
         }
 }
 
-class CasesList extends React.Component { 
-  caseItems() {
-    return this.props.caso.sort(makeComparator('name')).map(caso =>
-      <List.Item key={caso.id}>
-        <NavLink to={`/cases/${caso.id}`}>{caso.name}</NavLink>
-      </List.Item>
-    );
+class CaseDetailsLoader extends React.Component{
+  constructor(props) {
+    super(props);
+    this.state = { caso: [] }
   }
-
+  async componentDidMount() {
+    await this.fetchList();
+  }
+  async fetchList() {
+    const response = await API.get("casosapi", "/cases/" + this.props.id);
+    this.setState({ caso: [...response] });
+  }
+  render() {
+        return (<CaseDetails caso={this.state.caso}/> );
+  }
+}
+class CaseDetails extends React.Component {
   render() {
     return (
-      <Segment>
-        <Header as='h3'>Mis Casos</Header>
-        <List divided relaxed>
-          {this.caseItems()}
-        </List>
+        <Segment>
+          <Header as='h3'>Subir Imagenes </Header>
+          {this.props.caso.id}
+          <S3ImageUpload casos={this.props.caso.id}/>
+          <PhotosList photos={this.props.caso} />
       </Segment>
     );
   }
 }
 
-/*class CasesList extends React.Component {
+
+class CasesList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {caso: []};
@@ -154,7 +163,7 @@ class CasesList extends React.Component {
       </Segment>
     );
   }
-}*/
+}
 
 class S3ImageUpload extends React.Component {
   constructor(props) {
@@ -170,10 +179,10 @@ class S3ImageUpload extends React.Component {
       file, 
       {
         customPrefix: { public: 'uploads/' },
-        metadata: { caseid: this.props.caseId, owner: user.username }
+        metadata: { owner: user.username }
+        //metadata: { caseid: this.props.casos.id, owner: user.username }
       }
     );
-
     console.log('Uploaded file: ', result);
   }
 
@@ -232,37 +241,6 @@ class PhotosList extends React.Component {
   }
 }
 
-class CaseDetailsLoader extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { caso: [] }
-  }
-  async componentDidMount() {
-    await this.fetchList();
-  }
-  async fetchList() {
-    const response = await API.get("casosapi", "/cases/" + this.props.id);
-    this.setState({ caso: [...response] });
-  }
-
-  render() {
-        return (<CaseDetails caso={this.state.caso}/> );
-        }
-}
-
-class CaseDetails extends Component {
-  render() {
-      if (!this.props.caso) return 'Loading Case...';
-      return (
-          <Segment>
-            <Header as='h3'>{this.props.caso.id}</Header>
-            <Header as='h3'>{this.props.caso.photoCaseId}</Header>
-            <S3ImageUpload caseId={this.props.caso.id}/>        
-          </Segment>
-      )
-  }
-}
-
 class App extends Component {
   render(){
     return (
@@ -272,8 +250,7 @@ class App extends Component {
             <Route path="/" exact component={NewCase}/>
             <Route path="/" exact component={CasesListLoader} /> 
             <Route path="/cases/:caseId" render={ () => <div><NavLink to='/'>Regresar a Mis casos </NavLink></div> }/>
-            <Route
-              path="/cases/:caseId" render={props=> <CaseDetailsLoader id={props.match.params.caseId}/> }
+            <Route path="/cases/:caseId" render={props=> <CaseDetailsLoader id={props.match.params.caseId}/> }
             />
           </Grid.Column>
         </Grid>
